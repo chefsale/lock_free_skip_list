@@ -13,7 +13,7 @@ int main() {
   std::cout << "inserting" << std::endl;
   std::cout << 126 << std::endl;
 
-  std::cout << "inserting in parallel 126 and 226" << std::endl; 
+  std::cout << "inserting in parallel 126 and 226" << std::endl;
   std::thread t1(&LockFreeSkipList<int>::insert, std::ref(l), 126);
   std::thread t2(&LockFreeSkipList<int>::insert, std::ref(l), 226);
   t2.join();
@@ -26,10 +26,9 @@ int main() {
   std::cout << 26 << std::endl;
   l.insert(26);
 
-
   std::cout << "remove" << std::endl;
-  l.remove(26);  
-  std::cout << "inserting in parallel 126 and 226" << std::endl; 
+  l.remove(26);
+  std::cout << "inserting in parallel 126 and 226" << std::endl;
   std::thread t3(&LockFreeSkipList<int>::insert, std::ref(l), 526);
   std::thread t4(&LockFreeSkipList<int>::insert, std::ref(l), 26);
   t3.join();

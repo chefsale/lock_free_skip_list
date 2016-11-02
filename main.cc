@@ -1,73 +1,67 @@
 #include <chrono>
 #include <thread>
 
-#include "skip_list.h"
-#include "lock_free_skip_list.h"
 #include "concurrent_skip_list.h"
-
+#include "lock_free_skip_list.h"
+#include "skip_list.h"
 
 int main() {
   SkipList<long long> list;
-  LockFreeSkipList<long long> flist(0 , 10000000000000);
+  LockFreeSkipList<long long> flist(0, 10000000000000);
   long long* arr = new long long[200000];
-  
+
   std::random_device r;
-  std::default_random_engine generator_(r());                                    
-  std::uniform_int_distribution<long long> distribution_(0, 100000000000);  
+  std::default_random_engine generator_(r());
+  std::uniform_int_distribution<long long> distribution_(0, 100000000000);
 
   for (int i = 0; i < 200000; i++) {
     long long rand = distribution_(generator_);
-    //std::cout << rand << " ";
+    // std::cout << rand << " ";
     arr[i] = rand;
   }
 
-  auto start = std::chrono::steady_clock::now();  
+  auto start = std::chrono::steady_clock::now();
   for (int i = 0; i < 200000; i++) {
-    list.insert(arr+i);
+    list.insert(arr + i);
   }
   auto end = std::chrono::steady_clock::now();
 
+  std::cout << "time: "
+            << std::chrono::duration_cast<std::chrono::microseconds>(end -
+                                                                     start)
+                   .count()
+            << std::endl;
 
-  std::cout << "time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
-
-
-  start = std::chrono::steady_clock::now(); 
+  start = std::chrono::steady_clock::now();
 
   for (int i = 0; i < 1256; i++) {
     std::vector<std::thread> threads;
     for (int j = 0; j < 128; j++) {
-      //std::cout << "Pushing thread #" << (i*j+j)+1 << std::endl;
+      // std::cout << "Pushing thread #" << (i*j+j)+1 << std::endl;
       threads.push_back(std::thread(&LockFreeSkipList<long long>::insert,
-std::ref(flist), *(arr+(i*j+j))));
+                                    std::ref(flist), *(arr + (i * j + j))));
     }
     for (auto& thread : threads) thread.join();
   }
 
-
-
   end = std::chrono::steady_clock::now();
 
-  std::cout << "time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
-
-
-
-
-
-
-
-
+  std::cout << "time: "
+            << std::chrono::duration_cast<std::chrono::microseconds>(end -
+                                                                     start)
+                   .count()
+            << std::endl;
 
   int* rand = new int[20000];
   for (int i = 0; i < 20000; i++) {
-    *(rand + i)  = distribution_(generator_);
-//    std::cout << *(rand+i) << " ";
+    *(rand + i) = distribution_(generator_);
+    //    std::cout << *(rand+i) << " ";
   }
   std::cout << std::endl;
-  
-  
+
   for (int i = 0; i < 20000; i++) {
-  //  std::cout << *(rand+i) << " ";
-  //  std::cout << list.contains(*(rand+i)) << "\n";
+    //  std::cout << *(rand+i) << " ";
+    //  std::cout << list.contains(*(rand+i)) << "\n";
   }
 
   return 0;
