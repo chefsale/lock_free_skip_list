@@ -1,10 +1,10 @@
 #include <atomic>
 #include <functional>
+#include <iostream>
 #include <random>
 #include <string>
 #include <vector>
 
-#include <iostream>
 template <class T>
 class MarkableReference {
  private:
