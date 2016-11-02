@@ -73,18 +73,23 @@ class LockFreeSkipList {
     Node<V>* curr;
     Node<V>* succ;
     bool marked = false;
+  
+    int ret = 0;
 
-  retry:
+    retry:
+    ret++;
+    if (ret > 1)
+      std::cout << "Retry: #" << ret<< " val: " << value << std::endl;
     while (true) {
       pred = head_;
-      // std::cout << "pred: " << pred->value_ << std::endl;
+       //std::cout << "pred: " << pred->value_ << std::endl;
       for (int level = max_level_ - 1; level >= 0; level--) {
         curr = pred->next_[level]->load().getRef();
-        // std::cout << "curr: " << curr->value_ << std::endl;
+         //std::cout << "curr: " << curr->value_ << std::endl;
         while (true) {
           succ = curr->next_[level]->load().getRef();
           marked = curr->next_[level]->load().getMark();
-          // std::cout << "marked:" << marked << std::endl;
+           //std::cout << "marked:" << marked << std::endl;
           while (marked) {
             std::cout << "Target marked" << std::endl;
             auto x = MarkableReference<Node<V>>(curr, false);
@@ -133,8 +138,8 @@ class LockFreeSkipList {
         if (!pred->next_[0]->compare_exchange_strong(
                 x, MarkableReference<Node<V>>(new_node)))
           continue;
-        break;
-        for (int level = 1; level <= top_level; level++) {
+//        std::cout << "Fails after this" << std::endl;
+        for (int level = 1; level < top_level; level++) {
           while (true) {
             pred = preds[level];
             succ = succs[level];
@@ -145,6 +150,7 @@ class LockFreeSkipList {
             find(value, preds, succs);
           }
         }
+        return true;
       }
     }
   }

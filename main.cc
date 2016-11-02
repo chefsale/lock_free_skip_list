@@ -8,20 +8,29 @@
 int main() {
   SkipList<long long> list;
   LockFreeSkipList<long long> flist(0, 10000000000000);
-  long long* arr = new long long[200000];
+  long long* arr = new long long[1000000];
 
   std::random_device r;
   std::default_random_engine generator_(r());
   std::uniform_int_distribution<long long> distribution_(0, 100000000000);
 
-  for (int i = 0; i < 200000; i++) {
+  auto startr = std::chrono::steady_clock::now();
+  for (int i = 0; i < 1000000; i++) {
     long long rand = distribution_(generator_);
     // std::cout << rand << " ";
     arr[i] = rand;
   }
+  auto endr = std::chrono::steady_clock::now();
+
+  std::cout << "time: "
+            << std::chrono::duration_cast<std::chrono::microseconds>(endr -
+                                                                     startr)
+                   .count()
+            << std::endl;
+
 
   auto start = std::chrono::steady_clock::now();
-  for (int i = 0; i < 200000; i++) {
+  for (int i = 0; i < 1000000; i++) {
     list.insert(arr + i);
   }
   auto end = std::chrono::steady_clock::now();
@@ -34,9 +43,9 @@ int main() {
 
   start = std::chrono::steady_clock::now();
 
-  for (int i = 0; i < 1256; i++) {
+  for (int i = 0; i < 125000; i++) {
     std::vector<std::thread> threads;
-    for (int j = 0; j < 128; j++) {
+    for (int j = 0; j < 8; j++) {
       // std::cout << "Pushing thread #" << (i*j+j)+1 << std::endl;
       threads.push_back(std::thread(&LockFreeSkipList<long long>::insert,
                                     std::ref(flist), *(arr + (i * j + j))));
