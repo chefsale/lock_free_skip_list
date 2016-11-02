@@ -1,3 +1,6 @@
+#ifndef LOCK_FREE_SKIP_LIST_H
+#define LOCK_FREE_SKIP_LIST_H
+
 #include <atomic>
 #include <functional>
 #include <iostream>
@@ -203,3 +206,5 @@ class LockFreeSkipList {
     }
   }
 };
+
+#endif
