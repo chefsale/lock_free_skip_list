@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "timer.h"
+
 template <class T>
 class MarkableReference {
  private:
@@ -115,13 +117,15 @@ class LockFreeSkipList {
     }
   }
   bool insert(V value) {
+    Timer t;
+    t.Start();
+
     int top_level = random_level();
     std::vector<Node<V>*> preds(max_level_);
     std::vector<Node<V>*> succs(max_level_);
 
     while (true) {
       bool found = find(value, preds, succs);
-      // std::cout << "found " << value << " " << found << std::endl;
       if (found) {
         return false;
       } else {
@@ -138,7 +142,6 @@ class LockFreeSkipList {
         if (!pred->next_[0]->compare_exchange_strong(
                 x, MarkableReference<Node<V>>(new_node)))
           continue;
-//        std::cout << "Fails after this" << std::endl;
         for (int level = 1; level < top_level; level++) {
           while (true) {
             pred = preds[level];
@@ -150,8 +153,8 @@ class LockFreeSkipList {
             find(value, preds, succs);
           }
         }
-        return true;
       }
+        return true;
     }
   }
   bool remove(V value) {
