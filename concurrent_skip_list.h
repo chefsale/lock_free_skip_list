@@ -1,5 +1,4 @@
-#ifndef CONCURENT_SKIP_LIST_H
-#define CONCURENT_SKIP_LIST_H
+#pragma once
 
 #include <iostream>
 #include <mutex>
@@ -82,5 +81,3 @@ bool ConcurrentSkipList<T>::contains(T key) {
 
   return *(h->key_) == key;
 }
-
-#endif

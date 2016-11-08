@@ -1,5 +1,4 @@
-#ifndef SKIP_LIST_H
-#define SKIP_LIST_H
+#pragma once
 
 #include <iostream>
 #include <random>
@@ -76,5 +75,3 @@ bool SkipList<T>::contains(T key) {
 
   return *(h->key_) == key;
 }
-
-#endif
