@@ -66,9 +66,7 @@ class LockFreeSkipList {
   }
   int random_level() {
     int level = 1;
-
     while (distribution_(generator_) < probability_) level++;
-
     return std::min(level, max_level_);
   }
   bool find(V value, std::vector<Node<V>*>& preds,

@@ -6,11 +6,11 @@
 #include <vector>
 
 template <class T>
-class ConcurrentSkipNode {
+class SkipNode {
  public:
   T* key_;
-  std::vector<ConcurrentSkipNode<T>*> forward_;
-  ConcurrentSkipNode(T* key, int level) : key_(key), forward_(level, nullptr) {}
+  std::vector<SkipNode<T>*> forward_;
+  SkipNode(T* key, int level) : key_(key), forward_(level, nullptr) {}
 };
 
 template <class T>
@@ -18,7 +18,7 @@ class SkipList {
  private:
   int maximum_level_ = 16;
   constexpr static float probability_ = 0.5;
-  ConcurrentSkipNode<T> head_;
+  SkipNode<T> head_;
 
   int RandomLevel() const {
     int level = 1;
@@ -43,8 +43,8 @@ SkipList<T>::SkipList() : head_(nullptr, maximum_level_) {}
 
 template <class T>
 void SkipList<T>::insert(T* key) {
-  std::vector<ConcurrentSkipNode<T>*> update(maximum_level_, nullptr);
-  ConcurrentSkipNode<T>* h = &head_;
+  std::vector<SkipNode<T>*> update(maximum_level_, nullptr);
+  SkipNode<T>* h = &head_;
 
   for (int i = maximum_level_ - 1; i >= 0; i--) {
     while (h->forward_[i] != nullptr && *(h->forward_[i]->key_) < *key)
@@ -53,7 +53,7 @@ void SkipList<T>::insert(T* key) {
   }
 
   int new_level = RandomLevel();
-  h = new ConcurrentSkipNode<T>(key, new_level);
+  h = new SkipNode<T>(key, new_level);
 
   for (int i = 0; i < new_level; i++) {
     h->forward_[i] = update[i]->forward_[i];
@@ -63,7 +63,7 @@ void SkipList<T>::insert(T* key) {
 
 template <class T>
 bool SkipList<T>::contains(T key) {
-  ConcurrentSkipNode<T>* h = &head_;
+  SkipNode<T>* h = &head_;
 
   for (int i = maximum_level_ - 1; i >= 0; i--) {
     while (h->forward_[i] != nullptr && *(h->forward_[i]->key_) < key) {

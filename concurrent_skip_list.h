@@ -7,11 +7,11 @@
 #include <vector>
 
 template <class T>
-class SkipNode {
+class ConcurrentSkipNode {
  public:
   T* key_;
-  std::vector<SkipNode<T>*> forward_;
-  SkipNode(T* key, int level) : key_(key), forward_(level, nullptr) {}
+  std::vector<ConcurrentSkipNode<T>*> forward_;
+  ConcurrentSkipNode(T* key, int level) : key_(key), forward_(level, nullptr) {}
 };
 
 template <class T>
@@ -19,7 +19,7 @@ class ConcurrentSkipList {
  private:
   int maximum_level_ = 16;
   constexpr static float probability_ = 0.5;
-  SkipNode<T> head_;
+  ConcurrentSkipNode<T> head_;
   std::mutex head_mutex_;
 
   int RandomLevel() const {
@@ -47,8 +47,8 @@ template <class T>
 void ConcurrentSkipList<T>::insert(T* key) {
   std::lock_guard<std::mutex> lock(head_mutex_);
 
-  std::vector<SkipNode<T>*> update(maximum_level_, nullptr);
-  SkipNode<T>* h = &head_;
+  std::vector<ConcurrentSkipNode<T>*> update(maximum_level_, nullptr);
+  ConcurrentSkipNode<T>* h = &head_;
 
   for (int i = maximum_level_ - 1; i >= 0; i--) {
     while (h->forward_[i] != nullptr && *(h->forward_[i]->key_) < *key)
@@ -57,7 +57,7 @@ void ConcurrentSkipList<T>::insert(T* key) {
   }
 
   int new_level = RandomLevel();
-  h = new SkipNode<T>(key, new_level);
+  h = new ConcurrentSkipNode<T>(key, new_level);
 
   for (int i = 0; i < new_level; i++) {
     h->forward_[i] = update[i]->forward_[i];
@@ -69,7 +69,7 @@ template <class T>
 bool ConcurrentSkipList<T>::contains(T key) {
   std::lock_guard<std::mutex> lock(head_mutex_);
 
-  SkipNode<T>* h = &head_;
+  ConcurrentSkipNode<T>* h = &head_;
 
   for (int i = maximum_level_ - 1; i >= 0; i--) {
     while (h->forward_[i] != nullptr && *(h->forward_[i]->key_) < key) {
