@@ -56,15 +56,16 @@ class LockFreeSkipList {
 
  public:
   LockFreeSkipList(V min_value, V max_value)
-      : head_(new Node<V>(min_value)), tail_(new Node<V>(max_value)),
-generator_(r()), distribution_(0.0, 1.0) {
+      : head_(new Node<V>(min_value)),
+        tail_(new Node<V>(max_value)),
+        generator_(r()),
+        distribution_(0.0, 1.0) {
     for (int i = 0; i < head_->next_.size(); i++) {
       head_->next_[i] = new std::atomic<MarkableReference<Node<V>>>(tail_);
     }
   }
   int random_level() {
     int level = 1;
-
 
     while (distribution_(generator_) < probability_) level++;
 
@@ -79,9 +80,8 @@ generator_(r()), distribution_(0.0, 1.0) {
     Node<V>* curr;
     Node<V>* succ;
     bool marked = false;
-  
 
-    retry:
+  retry:
     while (true) {
       pred = head_;
       for (int level = max_level_ - 1; level >= 0; level--) {
@@ -151,7 +151,7 @@ generator_(r()), distribution_(0.0, 1.0) {
           }
         }
       }
-        return true;
+      return true;
     }
   }
   bool remove(V value) {
