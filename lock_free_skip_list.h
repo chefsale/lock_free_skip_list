@@ -80,25 +80,16 @@ generator_(r()), distribution_(0.0, 1.0) {
     Node<V>* succ;
     bool marked = false;
   
-    int ret = 0;
 
     retry:
-    ret++;
-    if (ret > 1)
-      std::cout << "Retry: #" << ret<< " val: " << value << std::endl;
     while (true) {
       pred = head_;
-       //std::cout << "pred: " << pred->value_ << std::endl;
       for (int level = max_level_ - 1; level >= 0; level--) {
         curr = pred->next_[level]->load().getRef();
-        //std::cout << pred->next_[level]->is_lock_free() << std::endl;
-         //std::cout << "curr: " << curr->value_ << std::endl;
         while (true) {
           succ = curr->next_[level]->load().getRef();
           marked = curr->next_[level]->load().getMark();
-           //std::cout << "marked:" << marked << std::endl;
           while (marked) {
-            std::cout << "Target marked" << std::endl;
             auto x = MarkableReference<Node<V>>(curr, false);
             snip = pred->next_[level]->compare_exchange_strong(
                 x, MarkableReference<Node<V>>(succ));
@@ -132,10 +123,7 @@ generator_(r()), distribution_(0.0, 1.0) {
 
     while (true) {
       bool found = find(value, preds, succs);
-      f++;
       if (found) {
-        if (f>1)
-        std::cout << "finds #" << f << std::endl;
         return false;
       } else {
         Node<V>* new_node = new Node<V>(value, top_level);
@@ -159,13 +147,10 @@ generator_(r()), distribution_(0.0, 1.0) {
             if (pred->next_[level]->compare_exchange_strong(
                     x, MarkableReference<Node<V>>(new_node)))
               break;
-            f++;
             find(value, preds, succs);
           }
         }
       }
-        if (f>1)
-        std::cout << "finds #" << f << std::endl;
         return true;
     }
   }

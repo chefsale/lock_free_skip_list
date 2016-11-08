@@ -6,12 +6,12 @@
 #include "skip_list.h"
 
 
-LockFreeSkipList<int> flist(0, 10000000);
+LockFreeSkipList<int> flist(0, 1000000000);
 int* arr = new int[1000000];
 
 void insert_range(int start, int end) {
   while (start < end) {
-    flist.insert(start);
+    flist.insert(*(arr+start));
     start++;
   }
 }
@@ -24,24 +24,17 @@ int main() {
   std::default_random_engine generator_(r());
   std::uniform_int_distribution<int> distribution_(0, 100000);
   
-  timer.Start();
   for (int i = 0; i < 1000000; i++) {
     int rand = distribution_(generator_);
-    // std::cout << rand << " ";
     arr[i] = rand;
   }
-  timer.End();
-  timer.Print();
 
-
-  /*
   timer.Start();
-  for (int i = 0; i < 1000000; i++) {
-    list.insert(arr + i);
-  }
+  for (int i = 0; i < 1000000; i++)
+    list.insert(arr+i);
   timer.End();
   timer.Print();
-  */
+
   timer.Start();
   std::vector<std::thread> threads;
   for (int j = 0; j < 4; j++) 
@@ -49,18 +42,6 @@ int main() {
   for (auto& thread : threads) thread.join();
   timer.End();
   timer.Print();
-
-  int* rand = new int[20000];
-  for (int i = 0; i < 20000; i++) {
-    *(rand + i) = distribution_(generator_);
-    //    std::cout << *(rand+i) << " ";
-  }
-  std::cout << std::endl;
-
-  for (int i = 0; i < 20000; i++) {
-    //  std::cout << *(rand+i) << " ";
-    //  std::cout << list.contains(*(rand+i)) << "\n";
-  }
 
   return 0;
 }
