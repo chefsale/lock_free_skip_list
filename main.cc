@@ -5,42 +5,48 @@
 #include "lock_free_skip_list.h"
 #include "skip_list.h"
 
+
+LockFreeSkipList<int> flist(0, 10000000);
+int* arr = new int[1000000];
+
+void insert_range(int start, int end) {
+  while (start < end) {
+    flist.insert(start);
+    start++;
+  }
+}
+
 int main() {
   Timer timer;
   SkipList<int> list;
-  LockFreeSkipList<int> flist(0, 10000000);
-  int* arr = new int[1000000];
 
   std::random_device r;
   std::default_random_engine generator_(r());
-  std::uniform_int_distribution<long long> distribution_(0, 100000);
+  std::uniform_int_distribution<int> distribution_(0, 100000);
   
   timer.Start();
   for (int i = 0; i < 1000000; i++) {
-    long long rand = distribution_(generator_);
+    int rand = distribution_(generator_);
     // std::cout << rand << " ";
-    arr[i] = i;
+    arr[i] = rand;
   }
   timer.End();
   timer.Print();
 
+
+  /*
   timer.Start();
   for (int i = 0; i < 1000000; i++) {
     list.insert(arr + i);
   }
   timer.End();
   timer.Print();
-
+  */
   timer.Start();
-  for (int i = 0; i < 250000; i++) {
-    std::vector<std::thread> threads;
-    for (int j = 0; j < 4; j++) {
-      // std::cout << "Pushing thread #" << (i*j+j)+1 << std::endl;
-      threads.push_back(std::thread(&LockFreeSkipList<int>::insert,
-                                    std::ref(flist), 250000*j+i));
-    }
-    for (auto& thread : threads) thread.join();
-  }
+  std::vector<std::thread> threads;
+  for (int j = 0; j < 4; j++) 
+      threads.push_back(std::thread(insert_range, 250000*j, 250000*(j+1)));
+  for (auto& thread : threads) thread.join();
   timer.End();
   timer.Print();
 

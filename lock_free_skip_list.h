@@ -48,12 +48,16 @@ class LockFreeSkipList {
  private:
   const int max_level_ = 32;
   float probability_ = 0.5;
+  std::random_device r;
+  std::default_random_engine generator_;
+  std::uniform_real_distribution<double> distribution_;
   Node<V>* head_;
   Node<V>* tail_;
 
  public:
   LockFreeSkipList(V min_value, V max_value)
-      : head_(new Node<V>(min_value)), tail_(new Node<V>(max_value)) {
+      : head_(new Node<V>(min_value)), tail_(new Node<V>(max_value)),
+generator_(r()), distribution_(0.0, 1.0) {
     for (int i = 0; i < head_->next_.size(); i++) {
       head_->next_[i] = new std::atomic<MarkableReference<Node<V>>>(tail_);
     }
@@ -61,9 +65,6 @@ class LockFreeSkipList {
   int random_level() {
     int level = 1;
 
-    std::random_device r;
-    std::default_random_engine generator_(r());
-    std::uniform_real_distribution<double> distribution_(0.0, 1.0);
 
     while (distribution_(generator_) < probability_) level++;
 
@@ -90,6 +91,7 @@ class LockFreeSkipList {
        //std::cout << "pred: " << pred->value_ << std::endl;
       for (int level = max_level_ - 1; level >= 0; level--) {
         curr = pred->next_[level]->load().getRef();
+        //std::cout << pred->next_[level]->is_lock_free() << std::endl;
          //std::cout << "curr: " << curr->value_ << std::endl;
         while (true) {
           succ = curr->next_[level]->load().getRef();
@@ -126,10 +128,14 @@ class LockFreeSkipList {
     int top_level = random_level();
     std::vector<Node<V>*> preds(max_level_);
     std::vector<Node<V>*> succs(max_level_);
+    int f = 0;
 
     while (true) {
       bool found = find(value, preds, succs);
+      f++;
       if (found) {
+        if (f>1)
+        std::cout << "finds #" << f << std::endl;
         return false;
       } else {
         Node<V>* new_node = new Node<V>(value, top_level);
@@ -153,10 +159,13 @@ class LockFreeSkipList {
             if (pred->next_[level]->compare_exchange_strong(
                     x, MarkableReference<Node<V>>(new_node)))
               break;
+            f++;
             find(value, preds, succs);
           }
         }
       }
+        if (f>1)
+        std::cout << "finds #" << f << std::endl;
         return true;
     }
   }
